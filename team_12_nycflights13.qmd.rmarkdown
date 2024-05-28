@@ -1,9 +1,10 @@
 ---
-title: "team_01_nycflights13.qmd"
+title: "team_12_nycflights13.qmd"
 format:
   html:
     embed-resources: true
 ---
+
 
 # Task 1: Establishing a Productive Software Environment for the Project
 
@@ -11,12 +12,15 @@ format:
 ![screenshot](media/screenshot.jpg)
 
 ## Task 1.2:
+![commit_screenshot](media/commit_ss.jpg)
 
-## Task 1.3:
+## Task 1.3: Connection code
+
 
 ```{r}
-con_nycflights13 <- DBI::dbConnect(odbc::odbc(), dsn = "nycflights13")
+con_nycflights13 <- DBI::dbConnect(odbc::odbc(), dsn = "nycflights")
 ```
+
 
 # Task 2
 
@@ -26,7 +30,8 @@ Three-letter airport code Airport name Number of destinations Rank
 
 Sort the results first by rank and, then, alphabetically by the three-letter airport code. Hint: use INNER JOIN to get airport names from airports table.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 
 SELECT
   a.faa AS airport_code,
@@ -43,11 +48,13 @@ WHERE a.tzone = 'America/New_York'
 GROUP BY a.faa;
 ```
 
+
 Which ten destination airports are served by the greatest number of seats from New York City? If airports are tied for the tenth place, ensure that all tied airports are included in the output. Include columns for the following attributes:
 
 Three-letter airport code Airport name Number of seats Rank Sort the results first by rank and, then, alphabetically by the three-letter airport code. Hint: the number of seats information is in planes.seats; same way as above to get airport names.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT
   a.faa AS airport_code,
   a.name AS airport_name,
@@ -69,11 +76,13 @@ GROUP BY
 LIMIT 10;
 ```
 
+
 What are the rankings of New York City’s main airports in terms of mean departure delay (highest delay first), weighting each flight equally when taking the average? Include columns for the following attributes:
 
 Three-letter airport code Airport name Mean departure delay in minutes, rounded to two decimal places Rank Sort the results first by rank, and then, alphabetically by the three-letter airport code.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT 
     a.faa AS airport_code,
     a.name AS airport_name,
@@ -94,11 +103,13 @@ ORDER BY
     airport_code;
 ```
 
+
 Tabulate the percentage of on-time departures for each hour of the day when the plane is scheduled to leave. Include columns for the following attributes:
 
 Hour of the day Percentage of on-time departures, rounded to two decimal places Sort the results by the hour of the day. Hint: use flights.sched_dep_time / 100 (integer division) to get the hour of the day, and you do not need to show the hours in which there is no scheduled departure.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT
   f.sched_dep_time / 100 AS hour_of_day,
   ROUND(
@@ -118,11 +129,13 @@ ORDER BY
   hour_of_day;
 ```
 
+
 Which planes, identified by their tail number, were operated by more than one airline? Include columns for the following attributes:
 
 Tail number Manufacturer Model Number of airlines (must be greater than 1) Sort the results alphabetically by tail number. Hint: DISTINCT flight carrier number per plane should be greater than 1.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT
     p.tailnum AS tail_number,
     p.manufacturer,
@@ -143,15 +156,17 @@ ORDER BY
 
 ```
 
+
 # Task 3
 
 Which airport names in the airports table contain the string 'Chicago'? Create a view named chicago_airports to save the result, including only the faa and name columns.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 DROP VIEW IF EXISTS chicago_airports;
 ```
 
-```{sql, connection=con}
+```{sql, connection=con_nycflights13}
 CREATE VIEW chicago_airports AS
 SELECT
     faa,
@@ -162,15 +177,17 @@ WHERE
     name ILIKE '%Chicago%';
 ```
 
-```{sql, connection=con}
+```{sql, connection=con_nycflights13}
 SELECT * FROM chicago_airports;
 ```
+
 
 How many flights departed from New York City to each of Chicago’s airports? Include columns for the following attributes:
 
 Three-letter code of the destination airport Name of the destination airport Number of flights Rank Sort the results first by rank and, then, alphabetically by the three-letter code of the destination airport.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 select 
     f.dest,
     a.name,
@@ -190,11 +207,13 @@ order by
     rank, f.dest;
 ```
 
+
 Which airlines operated flights from New York City to Chicago? Include columns for the following attributes:
 
 Two-letter airline code Airline name Number of flights Rank Sort the results first by rank and, then, alphabetically by the two-letter airline code.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT
     f.carrier AS airline_code,
     a.name AS airline_name,
@@ -214,11 +233,13 @@ ORDER BY
     rank, airline_code;
 ```
 
+
 Among airlines that operated a minimum of 100 flights from New York to Chicago, what are the percentages of on-time arrivals? Include columns for the following attributes:
 
 Manufacturer Model Number of flights Rank Sort the results first by rank, then alphabetically by manufacturer, and, lastly, by model.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT
     p.manufacturer,
     p.model,
@@ -249,9 +270,11 @@ ORDER BY
     rank, p.manufacturer, p.model;
 ```
 
+
 Was at least one departure from New York City to Chicago scheduled every day in 2013? Provide your answer in the form of a table with one row and one column, containing the value TRUE or FALSE. Hint: use CASE to generate TRUE or FASLE. Combine month and day to get everyday in 2013.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT 
     CASE 
         WHEN COUNT(*) = 365 THEN 'TRUE' 
@@ -271,11 +294,13 @@ FROM (
 ) AS daily_flights;
 ```
 
+
 # Task 4
 
 How many combinations of origin airport and time_hour are present in the flights table but absent from the weather table? Provide your answer in the form of a table with one row and one column
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT 
     COUNT(*) AS num_combinations
 FROM (
@@ -293,13 +318,15 @@ FROM (
 ) AS missing_combinations;
 ```
 
+
 What is the percentage of on-time departures from each of New York City’s main airports under dry conditions (i.e., precip = 0) and under wet conditions? Include columns for the following attributes:
 
 Three-letter airport code Airport name is_dry: Boolean values indicating zero precipitation. Percentage of on-time departures, rounded to two decimal places
 
 First, sort the results alphabetically by the three-letter airport code and, then, by the presence of precipitation.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT 
     a.faa AS airport_code,
     a.name AS airport_name,
@@ -327,11 +354,13 @@ ORDER BY
     a.faa, w.precip = 0;
 ```
 
+
 How do New York City’s main airports rank in terms of mean departure delay when the visibility was less than one mile? Include columns for the following attributes:
 
 Three-letter airport code Airport name Mean departure delay in minutes, rounded to two decimal places Rank Sort the results first by rank (starting with the smallest delay) and, then, alphabetically by the three-letter airport code.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 
 SELECT 
     a.faa AS airport_code,
@@ -352,9 +381,11 @@ ORDER BY
     rank, airport_code;
 ```
 
+
 What is the correlation coefficient between the mean temperature of the day and the mean departure delay on that day? Round the value to two decimal places. Provide the answer in the form of a table with one row and one column. Hint: calculate the AVG() of temperature for each day in 2013, and then the AVG() of departure delay for each day in 2013. After that, calculate the CORR() between these two sequences (of length 365 or less). Remember to INNER JOIN flights and weather.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT 
     ROUND(CAST(CORR(daily_weather.temp, daily_flights.dep_delay) AS numeric), 2) AS correlation_coefficient
 FROM (
@@ -387,9 +418,11 @@ INNER JOIN (
 ) AS daily_flights ON daily_weather.year = daily_flights.year AND daily_weather.month = daily_flights.month AND daily_weather.day = daily_flights.day;
 ```
 
+
 Burlington, Vermont, lies almost exactly to the north of New York City. Is the mean flight time to Burlington International Airport (BTV) shorter when the wind blows from the south (between 135 and 225 degrees) compared to when it blows from the north (between 0 and 45 degrees as well as between 315 and 360 degrees)? Provide your answer in the form of a table with one row each for north and south winds, and two columns, named wind_direction and mean_air_time. Hint: CASE expression.
 
-```{sql, connection=con}
+
+```{sql, connection=con_nycflights13}
 SELECT 
     wind_direction,
     ROUND(AVG(air_time), 2) AS mean_air_time
@@ -416,7 +449,9 @@ GROUP BY
 
 ```
 
+
 ## Disconnect from Database
+
 ```{r}
 DBI::dbDisconnect(con_nycflights13)
 ```
